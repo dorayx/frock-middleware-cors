@@ -1,9 +1,11 @@
 'use strict'
 
+import _assign from 'lodash.assign'
+
 module.exports = enableCORS
 
 function enableCORS (frock, logger, options) {
-  const corsOptions = Object.assign({
+  const corsOptions = _assign({
     allowOrigin: ['*'],
     allowMethods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE', 'CONNECT'],
     allowHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept'],
