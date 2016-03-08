@@ -1,6 +1,6 @@
 {
   "name": "frock-middleware-cors",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A simple frock middleware to enable CORS.",
   "main": "lib/index.js",
   "scripts": {
