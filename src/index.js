@@ -2,11 +2,80 @@
 
 import _assign from 'lodash.assign'
 
-module.exports = enableCORS
+function isTypeOf(object, typeName) {
+  return Object.prototype.toString.call(object).slice(8, -1) === typeName;
+}
+
+function isOriginAllowed (origin, allowedOrigins) {
+  if (isTypeOf(allowedOrigins, 'String')) {
+    return allowedOrigins === origin;
+  }
+
+  if (isTypeOf(allowedOrigins, 'Array')) {
+    return allowedOrigins.filter((allowed) => origin === origin).length > 0
+  }
+}
+
+function configureOrigin(request, options) {
+  let headers = []
+  let requestOrigin = request.headers.origin
+  let optionOrigin = options.allowOrigin
+
+  if (optionOrigin === '*') {
+    // allow any origin
+    headers.push({key: 'Access-Control-Allow-Origin', value: '*'})
+  } else if (isTypeOf(optionOrigin, 'String')) {
+    // fixed origin
+    headers.push({key: 'Access-Control-Allow-Origin', value: optionOrigin})
+    headers.push({key: 'Vary', value: 'Origin'})
+  } else if (isTypeOf(optionOrigin, 'Array')) {
+    // locate whether or not the request origin exists in the allowed origin
+    let isAllowed = isOriginAllowed(requestOrigin, optionOrigin)
+    headers.push({key: 'Access-Control-Allow-Origin', value: isAllowed ? requestOrigin : false})
+    headers.push({key: 'Vary', value: 'Origin'})
+  }
+
+  return headers
+}
+
+function configureMethods(options) {
+  let optionMethods = options.allowMethods
+  let actualMethods = isTypeOf(optionMethods, 'String') ? optionMethods : optionMethods.join(',')
+
+  return {key: 'Access-Control-Allow-Methods', value: actualMethods}
+}
+
+function configureCredentials(options) {
+  return options.allowCredentials ? {key: 'Access-Control-Allow-Credentials', value: options.allowCredentials} : null
+}
+
+function configureHeaders(request, options) {
+  let optionHeaders = options.allowHeaders
+  let actualHeaders = isTypeOf(optionHeaders, 'String') ? optionHeaders : optionHeaders.join(',')
+
+  return {key: 'Access-Control-Allow-Headers', value: actualHeaders}
+}
+
+function configureMaxAge(options) {
+  let optionMaxAge = String(options.maxAge)
+  return {key: 'Access-Control-Max-Age', value: optionMaxAge}
+}
+
+function applyHeaders(headers, response) {
+  headers.forEach((header) => {
+    if (isTypeOf(header, 'Object')) {
+      response.setHeader(header.key, header.value)
+    }
+
+    if (isTypeOf(header, 'Array')) {
+      applyHeaders(header, response)
+    }
+  })
+}
 
 function enableCORS (frock, logger, options) {
   const corsOptions = _assign({
-    allowOrigin: ['*'],
+    allowOrigin: '*',
     allowMethods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE', 'CONNECT'],
     allowHeaders: ['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept'],
     allowCredentials: false,
@@ -14,20 +83,33 @@ function enableCORS (frock, logger, options) {
   }, options)
 
   return function handler (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', corsOptions.allowOrigin.join(','))
+    var headers = [];
+
 
     if (req.method === 'OPTIONS') {
-      res.setHeader('Access-Control-Allow-Methods', corsOptions.allowMethods.join(','))
-      res.setHeader('Access-Control-Allow-Headers', corsOptions.allowHeaders.join(','))
-      res.setHeader('Access-Control-Allow-Credentials', String(corsOptions.allowCredentials))
-      res.setHeader('Access-Control-Max-Age', String(corsOptions.maxAge))
+      // a preflight request
+      headers.push(configureOrigin(req, corsOptions))
+      headers.push(configureCredentials(req, corsOptions))
+      headers.push(configureMethods(corsOptions))
+      headers.push(configureHeaders(req, corsOptions))
+      headers.push(configureMaxAge(req, corsOptions))
 
-      res.writeHead(200)
+      applyHeaders(headers, response)
+
+      res.writeHead(204)
       res.end()
 
       return
     }
 
+    // an actual request
+    headers.push(configureOrigin(req, corsOptions))
+    headers.push(configureCredentials(req, corsOptions))
+
+    applyHeaders(headers, response)
+
     next(req, res)
   }
 }
+
+module.exports = enableCORS
