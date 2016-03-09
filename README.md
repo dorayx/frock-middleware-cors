@@ -2,7 +2,7 @@
 
 A simple frock middleware to enable CORS.
 
-[![Build Status](https://travis-ci.org/dorayx/frock-middleware-cors.svg?branch=master)](https://travis-ci.org/dorayx/frock-middleware-cors)
+[![Build Status](https://img.shields.io/travis/dorayx/frock-middleware-cors/master.svg?style=flat-square)](https://travis-ci.org/dorayx/frock-middleware-cors/)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/feross/standard)
 
 ## `frockfile` Example
@@ -21,7 +21,11 @@ You would use this middleware in your `frockfile.json` as follows:
           "handler": "frock-static",
           "middleware": [
             {
-              "handler": "frock-middleware-cors"
+              "handler": "frock-middleware-cors",
+              "options": {
+                "allowOrigin": "http://foo.com",
+                "allowCredentials": true
+              }
             }
           ]
         }
@@ -33,39 +37,39 @@ You would use this middleware in your `frockfile.json` as follows:
 
 ## `options` Configuration
 
-### options.allowOrign: Array
+### options.allowOrign: String|Array
 
-An array of `origin`s specify a URI that may access the resource.
+A string or an array of `origin`s specifies URIs that may access the resource.
 
-It defaults to `['*']`.
+It defaults to `*`.
 
 ```
 options: {
-  allowOrigin: ['foo.com', 'bar.com']
+  allowOrigin: ['http://foo.com', 'http://bar.com']
 }
 ```
 
-### options.allowMethods: Array
+### options.allowMethods: String|Array
 
-An array of methods allowed when accessing the resource.
+A string or an array of methods which are allowed to access the resource.
 
 It defaults to `['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE', 'CONNECT']`.
 
 ```
 options: {
-  allowMethods: ['GET']
+  allowMethods: 'GET'
 }
 ```
 
-### options.allowHeaders: Array
+### options.allowHeaders: String|Array
 
-An array of headers that are used in response to a preflight request to indicate which HTTP headers can be used when the actual request is made.
+A string or an array of headers that are used in response to a preflight request to indicate which HTTP headers can be used when the actual request is made.
 
 It defaults to `['X-Requested-With', 'X-HTTP-Method-Override', 'Content-Type', 'Accept']`.
 
 ```
 options: {
-  allowHeaders: ['Content-Type']
+  allowHeaders: 'Content-Type'
 }
 ```
 
