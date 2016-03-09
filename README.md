@@ -4,6 +4,13 @@ A simple frock middleware to enable CORS.
 
 [![Build Status](https://img.shields.io/travis/dorayx/frock-middleware-cors/master.svg?style=flat-square)](https://travis-ci.org/dorayx/frock-middleware-cors/)
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/feross/standard)
+[![npm](https://img.shields.io/npm/v/frock-middleware-cors.svg?style=flat-square)](https://www.npmjs.com/package/frock-middleware-cors)
+
+## Install
+
+```
+npm install --save-dev frock-middleware-cors
+```
 
 ## `frockfile` Example
 
