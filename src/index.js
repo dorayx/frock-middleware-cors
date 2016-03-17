@@ -32,7 +32,9 @@ function configureOrigin (request, options) {
     // locate whether or not the request origin exists in the allowed origin
     let isAllowed = isOriginAllowed(requestOrigin, optionOrigin)
     headers.push({key: 'Access-Control-Allow-Origin', value: isAllowed ? requestOrigin : false})
-    headers.push({key: 'Vary', value: isAllowed ? 'Origin' : false})
+    if (isAllowed) {
+      headers.push({key: 'Vary', value: 'Origin'})
+    }
   }
 
   return headers
@@ -46,7 +48,11 @@ function configureMethods (request, options) {
 }
 
 function configureCredentials (request, options) {
-  return options.allowCredentials ? {key: 'Access-Control-Allow-Credentials', value: String(options.allowCredentials)} : null
+  if (options.allowCredentials) {
+    return {key: 'Access-Control-Allow-Credentials', value: String(options.allowCredentials)}
+  }
+
+  return null
 }
 
 function configureHeaders (request, options) {
